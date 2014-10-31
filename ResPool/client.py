@@ -9,7 +9,7 @@ def get_res(name, clock=-1):
     pass
 
 
-def update_res(name, cycle=-1, param=None):
+def update_res(name, cycle=None, param=None):
     pass
 
 
@@ -17,7 +17,7 @@ def get_clock():
     pass
 
 
-def register_listener(listener, action):
+def register_listener(ref_res, listener, action):
     pass
 
 
