@@ -11,12 +11,12 @@ def calc_function_hash(func_list):
 
 
 def get_set(dic, key):
-    if dic[key] is None:
+    if key not in dic:
         dic[key] = set()
     return dic[key]
 
 
 def get_list(dic, key):
-    if dic[key] is None:
+    if key not in dic:
         dic[key] = list()
     return dic[key]

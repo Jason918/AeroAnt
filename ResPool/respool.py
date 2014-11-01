@@ -17,3 +17,10 @@ def tick():
 def tock():
     res_manager.run_listener()
     Clock.tick()
+    report()
+
+
+def report():
+    print "-----------------------------------------------------"
+    print "CLOCK:", Clock.get()
+    res_manager.report()

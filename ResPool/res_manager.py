@@ -6,31 +6,40 @@ import utils
 
 
 def is_simple_model(model):
-    if type(model) is dict and model.has_key("$schema"):
+    if type(model) is dict and "$schema" in model:
         return False
     else:
         return True
 
 
 class Res:
-    def __init__(self, name, model, update):
+    def __init__(self, name, model, update_func):
         self.name = name
         self.model = model
-        self.update = update
+        self.update_func = update_func
         self.value = list()
         if is_simple_model(model):
-            self.set_value(model)
+            self.set_value(eval(model))
+        else:
+            print "full schema not support yet."
 
-    def update(self, param):
-        self.set_value(self.update(param))
+    def update(self, param=None):
+        arg_cnt = self.update_func.__code__.co_argcount
+        if arg_cnt == 0:
+            new_value = self.update_func()
+        elif arg_cnt == 1:
+            new_value = self.update_func(self.get_value())
+        else:
+            new_value = self.update_func(self.get_value(), param)
+        self.set_value(new_value)
 
     def set_value(self, value):
         self.value.append((Clock.get(), value))
 
-    def get(self, clock):
+    def get_value(self, clock=-1):
         cur = Clock.get()
         if clock < 0:
-            clock = cur - clock
+            clock = cur + clock
 
         if clock > cur or clock < 0:
             raise Exception("clock out of range")
@@ -52,23 +61,24 @@ timers = dict()
 listeners = dict()
 
 # format:
-#     name->[listener_id,]
+# name->[listener_id,]
 res_to_listener = dict()
 
 changed_res_set = set()
 
 
 def add_timer_callback(time, callback):
-    if timers[time] is None:
-        timers[time] = list()
-    timers[time].append(callback)
+    utils.get_list(timers, time).append(callback)
+
+
+def get_res(name):
+    if name not in pool:
+        return None
+    return pool[name]
 
 
 def get(name, clock=-1):
-    if not pool.has_key(name):
-        return None
-    res = pool[name]
-    return res.get(clock)
+    return get_res(name).get_value(clock)
 
 
 def add(name, model, update_func):
@@ -77,14 +87,15 @@ def add(name, model, update_func):
 
 def update(name, cycle=None, param=None):
     changed_res_set.add(name)
-    res = get(name)
+    res = get_res(name)
     res.update(param)
     if cycle is not None:
         add_timer_callback(Clock.get() + cycle, lambda: update(name, cycle, param))
 
 
 def add_listener(res_list, condition, action):
-    if type(condition) is not types.FunctionType or type(condition) is not types.FunctionType:
+    if not isinstance(condition, types.FunctionType) \
+            or not isinstance(condition, types.FunctionType):
         return None
 
     listener_id = utils.calc_function_hash([condition, action])
@@ -98,7 +109,7 @@ def add_listener(res_list, condition, action):
 
 
 def remove_listener(listener_id):
-    if not listeners.has_key(listener_id):
+    if listener_id not in listeners:
         return
     listener = listeners.pop(listener_id)
     res_list = listener[0]
@@ -108,7 +119,7 @@ def remove_listener(listener_id):
 
 def run_timer():
     clk = Clock.get()
-    if not timers.has_key(clk):
+    if clk not in timers:
         return
     callback_list = timers[clk]
     for callback in callback_list:
@@ -118,15 +129,17 @@ def run_timer():
 def run_listener():
     listener_id_set = set()
     for res_name in changed_res_set:
-        if res_to_listener.has_key(res_name):
-            listener_id_set += res_to_listener.get(res_name)
+        if res_name in res_to_listener:
+            for lid in res_to_listener.get(res_name):
+                listener_id_set.add(lid)
 
     for listener_id in listener_id_set:
-        if listeners.has_key(listener_id):
+        if listener_id in listeners:
             (res_list, condition, action) = listeners.get(listener_id)
             if condition():
                 action()
 
 
-
-
+def report():
+    for name in pool:
+        print name, " = ", pool.get(name).get_value()
