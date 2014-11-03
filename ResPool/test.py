@@ -1,7 +1,7 @@
 __author__ = 'Jason'
 
 from res_manager import *
-from respool import *
+from res_pool import *
 from random import random
 
 temp = "temperature"
@@ -27,12 +27,14 @@ tick()
 update(temp, 2, 3)
 update(hum, 1)
 update(sen, 1)
+
+
 def alert():
     print "WARNING!!!!!!temp=", get(temp), "humidity:", get(hum)
+
+
 lid = add_listener([temp, hum], lambda: get(temp) > 30 or get(hum) < 0.4, alert)
 tock()
-
-
 
 for i in range(10):
     tick()
