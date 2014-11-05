@@ -39,3 +39,5 @@ tock()
 for i in range(10):
     tick()
     tock()
+
+res_manager.report_xml()

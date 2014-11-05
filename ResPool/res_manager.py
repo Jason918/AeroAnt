@@ -1,5 +1,7 @@
 __author__ = 'jason'
 
+from lxml.builder import E
+from lxml.etree import tostring
 from clock import Clock
 import types
 import utils
@@ -143,3 +145,19 @@ def run_listener():
 def report():
     for name in pool:
         print name, " = ", pool.get(name).get_value()
+
+
+def report_xml(file_name="report.xml", clock=-1):
+    cur = Clock.get()
+    if clock < 0:
+        clock += cur
+    content = E.content(clock=str(clock))
+    for name in pool:
+        value = str(pool.get(name).get_value(clock))
+        content.insert(0, E.feature(E.name(name), E.currentValue(value)))
+    with open(file_name, "w") as fout:
+        fout.write(tostring(content, encoding='utf-8', xml_declaration=True, pretty_print=True))
+
+
+
+

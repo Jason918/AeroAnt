@@ -1,4 +1,5 @@
 __author__ = 'jason'
+import sky_client
 
 
 def add_res(name, model, update):
