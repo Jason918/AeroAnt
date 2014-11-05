@@ -20,10 +20,15 @@ class Res:
         self.model = model
         self.update_func = update_func
         self.value = list()
-        if is_simple_model(model):
-            self.set_value(eval(model))
-        else:
-            print "full schema not support yet."
+        # if is_simple_model(model):
+        # try :
+        # v = eval(model)
+        #     except Exception:
+        #         v = model
+        # else:
+        #     print "full schema not support yet."
+        self.set_value(model)
+
 
     def update(self, param=None):
         arg_cnt = self.update_func.__code__.co_argcount
