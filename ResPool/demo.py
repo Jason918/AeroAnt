@@ -17,8 +17,8 @@ add("Memory", {"Internal Memory": 1000, "SD card": 8000},
     lambda: {"Internal Memory": get("Internal Memory"), "SD card": get("SD card")})
 add("LED", "on", lambda value: {"on": "off", "off": "on"}[value])
 add("Battery", 100, lambda value: value - 1 if value > 1 else 0)
-add("surrounding", {"sound": 20, "wifi": "strong", "bt": "exit"},
-    lambda: {"sound": get("sound"), "wifi": get("wifi"), "bt": get("wifi")})
+add("surrounding", {"sound": 20, "wifi": "strong", "bluetooth": "exit"},
+    lambda: {"sound": get("sound"), "wifi": get("wifi"), "bluetooth": get("wifi")})
 tick()
 tock()
 
@@ -26,8 +26,8 @@ update("time", 1)
 update("location", 1)
 update("sound", 1)
 update("wifi", 1)
-update("bt", 1)
-update("UserEvent", 1)
+update("bluetooth", 1)
+update("user event", 1)
 update("Internal Memory", 1)
 update("SD card", 1)
 update("Memory", 1)
