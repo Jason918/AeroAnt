@@ -49,7 +49,7 @@ class Res:
             clock = cur + clock
 
         if clock > cur or clock < 0:
-            raise Exception("clock out of range")
+            return None
 
         for item in reversed(self.value):
             if item[0] <= clock:

@@ -1,3 +1,4 @@
+# coding=utf-8
 __author__ = 'Jason'
 
 from res_manager import *
@@ -20,13 +21,16 @@ add(hum, "0.5", humidity_update)
 
 sen = "sensor"
 add(sen, "{'humidity':0.5,'temperature':20}", lambda: {'humidity': get('humidity'), 'temperature': get('temperature')})
+
+# #update 方法可能要引用old_value，所以需要clock=1才能调用update
 tick()
 tock()
 
-tick()
 update(temp, 2, 3)
 update(hum, 1)
 update(sen, 1)
+
+tick()
 
 
 def alert():

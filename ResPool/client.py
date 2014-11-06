@@ -31,6 +31,7 @@ def get_clock():
 
     result_template = sky_client.get_content(["res_pool_client", "get_clock", cid, "?"])
     result = sky_client.read(result_template)
+    print result
     return result[3]
 
 
@@ -42,5 +43,9 @@ def register_listener(ref_res, condition, action):
     result = sky_client.read(result_template)
     return result[3]
 
+
+def ticktock(time):
+    content = sky_client.get_content(["res_pool", "ticktock", time])
+    sky_client.write(content)
 
 
