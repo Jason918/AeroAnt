@@ -3,22 +3,44 @@ import sky_client
 
 
 def add_res(name, model, update):
-    pass
+    content = sky_client.get_content(["res_pool", "add_res", [name, model, update]])
+    sky_client.write(content)
 
 
-def get_res(name, clock=-1):
-    pass
+def get_res_value(name, clock=-1):
+    content, cid = sky_client.get_content(["res_pool", "get_res", [name, clock]], return_id=True)
+    sky_client.write(content)
+
+    result_template = sky_client.get_content(["res_pool_client", "get_res", cid, "?"])
+    result = sky_client.read(result_template)
+    return result[3]
 
 
 def update_res(name, cycle=None, param=None):
-    pass
+    content, cid = sky_client.get_content(["res_pool", "update_res", [name, cycle, param]], return_id=True)
+    sky_client.write(content)
+
+    result_template = sky_client.get_content(["res_pool_client", "update_res", cid, "?"])
+    result = sky_client.read(result_template)
+    return result[3]
 
 
 def get_clock():
-    pass
+    content, cid = sky_client.get_content(["res_pool", "get_clock", []], return_id=True)
+    sky_client.write(content)
+
+    result_template = sky_client.get_content(["res_pool_client", "get_clock", cid, "?"])
+    result = sky_client.read(result_template)
+    return result[3]
 
 
-def register_listener(ref_res, listener, action):
-    pass
+def register_listener(ref_res, condition, action):
+    content, cid = sky_client.get_content(["res_pool", "add_listener", [ref_res, condition, action]], return_id=True)
+    sky_client.write(content)
+
+    result_template = sky_client.get_content(["res_pool_client", "add_listener", cid, "?"])
+    result = sky_client.read(result_template)
+    return result[3]
+
 
 
