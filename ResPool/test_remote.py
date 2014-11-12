@@ -3,7 +3,7 @@ import client
 from random import random
 
 
-client.ticktock(1)
+client.ticktock(123)
 print client.get_clock()
 # temp = "temperature"
 # client.add_res(temp, "20", lambda value, delta: value + delta)

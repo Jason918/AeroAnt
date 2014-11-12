@@ -28,8 +28,10 @@ def __decode(item):
 def __handle_result(r, is_multi, return_id):
     ret = r.json()
     if not is_multi:
-        if len(ret) > 1:
-            print "sky drop too many results!"
+
+        if len(ret) != 1:
+            print "invalid ret:",ret
+            return None
         ret = ret[0]
         content = ret["content"].split(",")
         result = map(__decode, content)

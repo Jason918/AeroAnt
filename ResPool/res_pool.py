@@ -9,8 +9,15 @@ import sky_client
 def __res_server__():
     request_content = sky_client.get_content(["res_pool", "?", "?"])
     while True:
-        request, rid = sky_client.take(request_content, return_id=True)
-        func, param = request[1:2]
+        req = sky_client.take(request_content, return_id=True, timeout=60000)
+        if req is None:
+            continue
+        request, rid = req
+        if len(request) != 3:
+            print "request format error,request:", request
+            continue
+        func = request[1]
+        param = request[2]
         res_value = None
         print "func=", func, "param=", param
         if func == "get_res":

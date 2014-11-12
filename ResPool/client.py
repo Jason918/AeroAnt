@@ -13,7 +13,11 @@ def get_res_value(name, clock=-1):
 
     result_template = sky_client.get_content(["res_pool_client", "get_res", cid, "?"])
     result = sky_client.read(result_template)
-    return result[3]
+    if result is None and len(result) < 3:
+        print "update_res Failed"
+        return None
+    else:
+        return result[3]
 
 
 def update_res(name, cycle=None, param=None):
@@ -22,7 +26,11 @@ def update_res(name, cycle=None, param=None):
 
     result_template = sky_client.get_content(["res_pool_client", "update_res", cid, "?"])
     result = sky_client.read(result_template)
-    return result[3]
+    if result is None and len(result) < 3:
+        print "update_res Failed"
+        return None
+    else:
+        return result[3]
 
 
 def get_clock():
@@ -31,8 +39,11 @@ def get_clock():
 
     result_template = sky_client.get_content(["res_pool_client", "get_clock", cid, "?"])
     result = sky_client.read(result_template)
-    print result
-    return result[3]
+    if result is None or len(result) < 3:
+        print "update_res Failed"
+        return None
+    else:
+        return result[3]
 
 
 def register_listener(ref_res, condition, action):
@@ -41,7 +52,11 @@ def register_listener(ref_res, condition, action):
 
     result_template = sky_client.get_content(["res_pool_client", "add_listener", cid, "?"])
     result = sky_client.read(result_template)
-    return result[3]
+    if result is None and len(result) < 3:
+        print "update_res Failed"
+        return None
+    else:
+        return result[3]
 
 
 def ticktock(time):
