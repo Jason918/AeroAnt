@@ -4,6 +4,7 @@ import res_manager
 from clock import Clock
 import threading
 import sky_client
+import utils
 
 
 def __res_server__():
@@ -25,7 +26,8 @@ def __res_server__():
             res_value = res_manager.get(name, clock)
         elif func == "add_res":
             name, model, update = param
-            res_value = res_manager.add(name, model, update)
+            res_value = res_manager.add(name, model,
+                                        utils.string_to_function(update, "update"))
         elif func == "get_clock":
             res_value = Clock.get()
         elif func == "update_res":
@@ -33,7 +35,9 @@ def __res_server__():
             res_value = res_manager.update(name, cycle, par)
         elif func == "add_listener":
             ref_res, condition, action = param
-            res_manager.add_listener(ref_res, condition, action)
+            res_manager.add_listener(ref_res,
+                                     utils.string_to_function(condition, "condition"),
+                                     utils.string_to_function(action, "action"))
         elif func == "ticktock":
             time = int(param)
             for i in range(time):

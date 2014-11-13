@@ -30,7 +30,7 @@ def __handle_result(r, is_multi, return_id):
     if not is_multi:
 
         if len(ret) != 1:
-            print "invalid ret:",ret
+            print "invalid ret:", ret
             return None
         ret = ret[0]
         content = ret["content"].split(",")

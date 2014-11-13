@@ -1,6 +1,12 @@
-__author__ = 'jason'
-
+import marshal
 import hashlib
+import types
+import base64
+
+from clock import Clock
+from random import random
+
+__author__ = 'jason'
 
 
 def calc_function_hash(func_list):
@@ -20,3 +26,23 @@ def get_list(dic, key):
     if key not in dic:
         dic[key] = list()
     return dic[key]
+
+
+def function_to_string(func):
+    if func is None:
+        return None
+    if not hasattr(func, '__call__'):
+        raise Exception("func is not callable!")
+    code_str = marshal.dumps(func.func_code)
+    return base64.b64encode(code_str)
+
+
+def string_to_function(string, function_name="func"):
+    if string is None:
+        return None
+    string = base64.b64decode(string)
+    code = marshal.loads(string)
+    from res_manager import get
+
+    func = types.FunctionType(code, dict(globals().items() + locals().items()), function_name)
+    return func
