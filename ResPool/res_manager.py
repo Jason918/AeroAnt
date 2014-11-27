@@ -164,5 +164,9 @@ def report_xml(file_name="report.xml", clock=-1):
         fout.write(tostring(content, encoding='utf-8', xml_declaration=True, pretty_print=True))
 
 
-
-
+def reset():
+    pool.clear()
+    timers.clear()
+    listeners.clear()
+    res_to_listener.clear()
+    changed_res_set.clear()

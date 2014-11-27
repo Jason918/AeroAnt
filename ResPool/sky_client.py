@@ -65,7 +65,7 @@ def read(content, is_multi=False, timeout=500, return_id=False):
     r = requests.get(SKY_SERVER + READ_URL, params=param)
 
     result = __handle_result(r, is_multi, return_id)
-    print "READ:", result
+    #print "READ:", result
     return result
 
 
@@ -82,7 +82,7 @@ def take(content, is_multi=False, timeout=500, return_id=False):
 
 
 def get_content(item_list, return_id=False):
-    print "get_content:", item_list, return_id
+    #print "get_content:", item_list, return_id
     content = ",".join(map(__encode, item_list))
     if return_id:
         cid = hashlib.sha1(content).hexdigest()

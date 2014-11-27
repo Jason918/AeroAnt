@@ -15,5 +15,9 @@ class Clock:
     def get(cls):
         return Clock._clock
 
+    @classmethod
+    def reset(cls):
+        cls._clock = 0
+
 
 

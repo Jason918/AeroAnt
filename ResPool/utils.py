@@ -31,7 +31,7 @@ def get_list(dic, key):
 def function_to_string(func):
     if func is None:
         return None
-    if not hasattr(func, '__call__'):
+    if not is_function(func):
         raise Exception("func is not callable!")
     code_str = marshal.dumps(func.func_code)
     return base64.b64encode(code_str)
@@ -43,6 +43,9 @@ def string_to_function(string, function_name="func"):
     string = base64.b64decode(string)
     code = marshal.loads(string)
     from res_manager import get
-
     func = types.FunctionType(code, dict(globals().items() + locals().items()), function_name)
     return func
+
+
+def is_function(func):
+    return hasattr(func, '__call__')
