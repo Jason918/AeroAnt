@@ -13,7 +13,6 @@ def reset():
     Clock.reset()
 
 
-
 def _handle_request(request_content):
     req = sky_client.take(request_content, return_id=True, timeout=60000)
     if req is None:
@@ -39,13 +38,15 @@ def _handle_request(request_content):
                 update_function = utils.string_to_function(update[1], "update")
             elif update[0] == "default":
                 update_function = default_functions.get(update[1])
-            else :
-                print "Unknown Update:",update
+                delay = update[1]["delay"]
+                cycle = update[1]["next"]
+                res_manager.update_delay(name, delay, cycle)
+            else:
+                print "Unknown Update:", update
                 return
-        else :
-            print "Unknown Update:",update
+        else:
+            print "Unknown Update:", update
             return
-
         res_value = res_manager.add(name, model, update_function)
     elif func == "get_clock":
         res_value = Clock.get()
@@ -80,13 +81,13 @@ def __res_server__():
             print e
 
 
-
 __server_thread__ = threading.Thread(target=__res_server__)
 
 
 def start():
     # __server_thread__.start()
     __res_server__()
+
 
 def tick():
     res_manager.changed_res_set.clear()

@@ -6,14 +6,6 @@ from clock import Clock
 import types
 import utils
 
-
-def is_simple_model(model):
-    if type(model) is dict and "$schema" in model:
-        return False
-    else:
-        return True
-
-
 class Res:
     def __init__(self, name, model, update_func):
         self.name = name
@@ -27,8 +19,14 @@ class Res:
         #         v = model
         # else:
         #     print "full schema not support yet."
-        self.set_value(model)
-
+        if type(model) is dict and "initial" in model:
+            value = model["initial"]
+            if "format" in model:
+                format = model["format"]
+                if type(format) is str and format in ["number", "dict", "str", "list"]:
+                    print "eval value in format", format
+                    value = eval(value)
+            self.set_value(value)
 
     def update(self, param=None):
         arg_cnt = self.update_func.__code__.co_argcount
@@ -170,3 +168,7 @@ def reset():
     listeners.clear()
     res_to_listener.clear()
     changed_res_set.clear()
+
+
+def update_delay(name, delay, cycle, param=None):
+    add_timer_callback(Clock.get() + delay, lambda: update(name, cycle, param))

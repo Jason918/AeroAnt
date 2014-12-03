@@ -1,0 +1,147 @@
+{'res_list': {
+    'res': [
+        {
+            'model': {
+                'initial': '25',
+                'format': 'number'
+            },
+            '@name': 'temperature',
+            'update': {
+                'delay': '1',
+                'rule': {
+                    'function': {
+                        '@name': 'simple_rand',
+                        '@type': 'probability',
+                        'prameter': [
+                            {
+                                '#text': '-40',
+                                '@name': 'min'
+                            },
+                            {
+                                '#text': '50',
+                                '@name': 'max'
+                            }
+                        ]
+                    }
+                },
+                'next': '5'
+            }
+        },
+        {
+            'model': {
+                'initial': '10',
+                'format': 'number'
+            },
+            '@name': 'humidity',
+            'update': {
+                'delay': '1',
+                'rule': {
+                    'function': {
+                        '@name': 'linear',
+                        '@type': 'math_expression',
+                        'prameter': [
+                            {
+                                '#text': '0.1',
+                                '@name': 'a'
+                            },
+                            {
+                                '#text': '10',
+                                '@name': 'b'
+                            },
+                            {
+                                '#text': '$clock',
+                                '@name': 'x'
+                            }
+                        ]
+                    }
+                },
+                'next': '1'
+            }
+        },
+        {
+            'model': {
+                'initial': '0',
+                'format': 'number'
+            },
+            '@name': 'distance',
+            'update': {
+                'delay': '1',
+                'rule': {
+                    'function': {
+                        '@name': 'add',
+                        '@type': 'math_expression',
+                        'prameter': [
+                            {
+                                '#text': '1111',
+                                '@name': 'a'
+                            },
+                            {
+                                '#text': '$self',
+                                '@name': 'b'
+                            }
+                        ]
+                    }
+                },
+                'next': '1'
+            }
+        },
+        {
+            'model': {
+                'initial': '"other_country"',
+                'format': 'string'
+            },
+            '@name': 'location',
+            'update': {
+                'delay': '1',
+                'rule': {
+                    'function': {
+                        '@name': 'markov_chain',
+                        '@type': 'probability',
+                        'prameter': [
+                            {
+                                '#text': '["other_country","register_province","other_province"]',
+                                '@name': 'state_set'
+                            },
+                            {
+                                '#text': '"other_country"',
+                                '@name': 'init_state'
+                            },
+                            {
+                                '#text': '[[0.2,0.5,0.3],[0.2,0.5,0.3],[0.2,0.5,0.3]]',
+                                '@name': 'trans_matrix'
+                            }
+                        ]
+                    }
+                },
+                'next': '3'
+            }
+        },
+        {
+            'model': {
+                'initial': '',
+                'format': 'dict'
+            },
+            '@name': 'sensor',
+            'update': {
+                'delay': '1',
+                'rule': {
+                    'function': {
+                        '@name': 'combine',
+                        '@type': 'others',
+                        'prameter': [
+                            {
+                                '#text': '$temperature',
+                                '@name': 'section'
+                            },
+                            {
+                                '#text': '$humidity',
+                                '@name': 'section'
+                            }
+                        ]
+                    }
+                },
+                'next': '5'
+            }
+        }
+    ]
+}}

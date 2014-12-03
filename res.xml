@@ -1,0 +1,127 @@
+<res_list>
+    <res name="temperature">
+        <model>
+            <format>
+                number
+            </format>
+            <initial>
+                25
+            </initial>
+        </model>
+        <update>
+            <delay>
+                1
+            </delay>
+            <next>
+                5
+            </next>
+            <rule>
+                <function name="simple_rand" type="probability">
+                    <parameter name="min">-40</parameter>
+                    <parameter name="max">50</parameter>
+                </function>
+            </rule>
+        </update>
+    </res>
+    <res name="humidity">
+        <model>
+            <format>
+                number
+            </format>
+            <initial>
+                10
+            </initial>
+        </model>
+        <update>
+            <delay>
+                1
+            </delay>
+            <next>
+                1
+            </next>
+            <rule>
+                <function name="linear" type="math_expression">
+                    <parameter name="a">0.1</parameter>
+                    <parameter name="b">10</parameter>
+                    <parameter name="x">$clock</parameter>
+                </function>
+            </rule>
+        </update>
+    </res>
+     <res name="distance">
+        <model>
+            <format>
+                number
+            </format>
+            <initial>
+                0
+            </initial>
+        </model>
+        <update>
+            <delay>
+                1
+            </delay>
+            <next>
+                1
+            </next>
+            <rule>
+                <function name="add" type="math_expression">
+                    <parameter name="a">1111</parameter>
+                    <parameter name="b">$self</parameter>
+                </function>
+            </rule>
+        </update>
+    </res>
+
+
+    <res name="location">
+        <model>
+            <format>
+                string
+            </format>
+            <initial>
+                "other_country"
+            </initial>
+        </model>
+        <update>
+            <delay>
+                1
+            </delay>
+            <next>
+                3
+            </next>
+            <rule>
+                <function name="markov_chain" type="probability">
+                    <parameter name="state_set">["other_country","register_province","other_province"]</parameter>
+                    <parameter name="init_state">"other_country"</parameter>
+                    <parameter name="trans_matrix">[[0.2,0.5,0.3],[0.2,0.5,0.3],[0.2,0.5,0.3]]</parameter>
+                </function>
+            </rule>
+        </update>
+    </res>
+    <res name="sensor">
+        <model>
+            <format>
+                dict
+            </format>
+            <initial>
+
+            </initial>
+        </model>
+        <update>
+            <delay>
+                1
+            </delay>
+            <next>
+                5
+            </next>
+            <rule>
+                <function name="combine" type="others">
+                    <parameter name="section">$temperature</parameter>
+                    <parameter name="section">$humidity</parameter>
+                </function>
+            </rule>
+        </update>
+    </res>
+
+</res_list>
