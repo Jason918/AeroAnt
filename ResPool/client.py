@@ -110,14 +110,16 @@ def add_res(name, model, update):
     """
     add a Res Object in ResPool
     :param name: name of the Res. Must be unique.
-    :param model: model of the Res. Can be an JSON schema or just a JSON object for initial value.
-    :param update: update method of the Res. This value can be a function , a dict or None.
+    :param model: model of the Res. This should be a dict containing:
+            model:
+            initial:
+    :param update: update method of the Res. This value can be a function object, a dict or None.
         function: a function object or lambda object which accept the old value of this Res as the first parameter.
         dict: use one of default function. Format:
             {
-                "method": "Time"/"Randint"/"MarkovChain"/"NormalVariate"/"LinearClock"...,
-                "some extra parameters....": "",
-                ....
+                delay: int, update delay in clock count.
+                next: can be an int constant or a default function;
+                update : a default function;
             }
         None: no update function. This Res only can be modified by its default set function.
     :return: true, if add resource is success.
@@ -125,15 +127,36 @@ def add_res(name, model, update):
     update_function = None
 
     if utils.is_function(update):
-        update_function = ["function", utils.function_to_string(update)]
-    elif type(update) is dict and "method" in update:
-        update_function = ["default", update]
+        update_function = ["PythonFunctionObject", utils.function_to_string(update)]
+    elif type(update) is dict:
+        update_function = ["DefaultFunction", update]
     else:
         update_function = update
 
     content = sky_client.get_content(["res_pool", "add_res", [name, model, update_function]])
     sky_client.write(content)
 
+
+def modify_res_value(name, delta):
+    """
+    this res must be a number type.
+    :param name: name of the res
+    :param delta: change value.
+    :return: None
+    """
+    content = sky_client.get_content(["res_pool", "modify_res_value", [name, delta]], return_id=False)
+    sky_client.write(content)
+
+
+def set_res_value(name, value):
+    """
+    NOTICE this operation will override the auto-update result of the res.
+    :param name:
+    :param value:
+    :return:
+    """
+    content = sky_client.get_content(["res_pool", "set_res_value", [name, value]], return_id=False)
+    sky_client.write(content)
 
 def get_res_value(name, clock=-1):
     content, cid = sky_client.get_content(["res_pool", "get_res", [name, clock]], return_id=True)

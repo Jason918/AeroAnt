@@ -1,6 +1,6 @@
 import math
 import res_manager
-
+import utils
 __author__ = 'jason'
 
 METHOD_TIME = "Time"
@@ -47,7 +47,9 @@ def markov_chain(value, states, init_state, transform):
 
 
 def get_value(value, v):
-    if value == "$slef":
+    if utils.is_function(value):
+        return value()
+    elif value == "$slef":
         return v
     elif value == "$clock":
         return Clock.get()
@@ -57,72 +59,81 @@ def get_value(value, v):
         return value
 
 
-def get(data):
+def get(data, return_type=None):
+    if "function" not in data:
+        if return_type is None:
+            return data
+        elif return_type == "lambda":
+            return lambda: data
+
+    data = data["function"]
+
     if "method" not in data:
         print "invalid data for default method"
         return
     method = data["method"]
+    parameter = data["parameter"]
 
     if method.startswith(MATH_PREFIX):
         if method == METHOD_MATH_ADD:
-            a = data["parameter"]["a"]
-            b = data["parameter"]["b"]
+            a = get(parameter["a"])
+            b = get(parameter["b"])
             method = lambda value: get_value(a, value) + get_value(b, value)
         elif method == METHOD_MATH_DIVISION:
-            a = data["parameter"]["a"]
-            b = data["parameter"]["b"]
+            a = get(parameter["a"])
+            b = get(parameter["b"])
             method = lambda value: get_value(a, value) / get_value(b, value)
         elif method == METHOD_MATH_MINUS:
-            a = data["parameter"]["a"]
-            b = data["parameter"]["b"]
+            a = get(parameter["a"])
+            b = get(parameter["b"])
             method = lambda value: get_value(a, value) - get_value(b, value)
         elif method == METHOD_MATH_MULTIPLY:
-            a = data["parameter"]["a"]
-            b = data["parameter"]["b"]
+            a = get(parameter["a"])
+            b = get(parameter["b"])
             method = lambda value: get_value(a, value) * get_value(b, value)
         elif method == METHOD_MATH_MOD:
-            a = data["parameter"]["a"]
-            b = data["parameter"]["b"]
+            a = get(parameter["a"])
+            b = get(parameter["b"])
             method = lambda value: get_value(a, value) % get_value(b, value)
         elif method == METHOD_MATH_LINEAR:
-            a = data["parameter"]["a"]
-            b = data["parameter"]["b"]
-            x = data["parameter"]["x"]
+            a = get(parameter["a"])
+            b = get(parameter["b"])
+            x = get(parameter["x"])
             method = lambda value: get_value(a, value) * get_value(x, value) + get_value(b, value)
         elif method == METHOD_MATH_SIN:
-            a = data["parameter"]["a"]
-            b = data["parameter"]["b"]
-            x = data["parameter"]["x"]
+            a = get(parameter["a"])
+            b = get(parameter["b"])
+            x = get(parameter["x"])
             method = lambda value: get_value(a, value) * math.sin(get_value(x, value)) + get_value(b, value)
         elif method == METHOD_MATH_LOG:
-            a = data["parameter"]["a"]
-            b = data["parameter"]["b"]
-            x = data["parameter"]["x"]
+            a = get(parameter["a"])
+            b = get(parameter["b"])
+            x = get(parameter["x"])
             method = lambda value: get_value(a, value) * math.log(get_value(x, value)) + get_value(b, value)
         else:
             print "not support method:", method
     elif method.startswith(PROBABILITY_PREFIX):
         if method == METHOD_PROBABILITY_MARKOV_CHAIN:
-            state_set = data["parameter"]["state_set"]
-            init_state = data["parameter"]["init_state"]
-            trans_matrix = data["parameter"]["trans_matrix"]
+            state_set = parameter["state_set"]
+            init_state = parameter["init_state"]
+            trans_matrix = parameter["trans_matrix"]
             method = lambda value: markov_chain(value, state_set, init_state, trans_matrix)
         elif method == METHOD_PROBABILITY_NORMAL_VARIATE_RAND:
-            mu = data["parameter"]["mu"]
-            sigma = data["parameter"]["sigma"]
-            method = lambda: normalvariate(mu, sigma)
+            mu = get(parameter["mu"])
+            sigma = get(parameter["sigma"])
+            method = lambda value: normalvariate(get_value(mu, value), get_value(sigma, value))
         elif method == METHOD_PROBABILITY_SIMPLE_RAND:
-            min_value = data["parameter"]["min"]
-            max_value = data["parameter"]["max"]
-            method = lambda: randint(min_value, max_value)
+            min_value = get(parameter["min"])
+            max_value = get(parameter["max"])
+            method = lambda value: randint(get_value(min_value, value), get_value(max_value,value))
         else:
             print "not support method:", method
     else:
         if method == METHOD_OTHERS_COMBINE:
-            sections = data["parameter"]["section"]
+            sections = parameter["section"]
             method = lambda value: dict((section['name'], get_value(section['value'], value)) for section in sections)
         elif method == METHOD_OTHERS_DATA_LIST:
-            data_list = data["parameter"]["data_list"]
+            data_list = parameter["data_list"]
             method = lambda value: data_list[Clock.get() % len(data_list)]
         else:
             print "not support method:", method

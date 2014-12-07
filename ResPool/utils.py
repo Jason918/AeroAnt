@@ -82,11 +82,23 @@ def etree_to_dict(t):
     return d
 
 
-def warp_update(update):
+def warp_update_value(func):
+    """
+
+    :param func:
+    :return: format:
+    {
+        "function": function name,
+        "parameter": {
+            some parameter: parameter value,
+            ...
+        }
+    }
+    """
+    if "function" not in func:
+        return func
     ret = dict()
-    ret["delay"] = int(update["delay"])
-    ret["next"] = int(update["next"])
-    f = update["rule"]["function"]
+    f = func["function"]
     ret["method"] = f["@type"] + "#" + f["@name"]
     p = dict()
     ret["parameter"] = p
@@ -95,7 +107,15 @@ def warp_update(update):
     else:
         for param in f["parameter"]:
             if param["@name"] in p:
-                p[param["@name"]] = [p[param["@name"]], param["#text"]]
+                p[param["@name"]] = [p[param["@name"]], warp_update_value(param["#text"])]
             else:
-                p[param["@name"]] = param["#text"]
+                p[param["@name"]] = warp_update_value(param["#text"])
+    return ret
+
+
+def warp_update(update):
+    ret = dict()
+    ret["delay"] = int(update["delay"])
+    ret["next"] = warp_update_value(update["next"])
+    ret["rule"] = warp_update_value(update["rule"])
     return ret

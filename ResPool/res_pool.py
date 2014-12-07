@@ -34,13 +34,13 @@ def _handle_request(request_content):
         if update is None:
             update_function = None
         elif len(update) == 2:
-            if update[0] == "function":
+            if update[0] == "PythonFunctionObject":
                 update_function = utils.string_to_function(update[1], "update")
-            elif update[0] == "default":
-                update_function = default_functions.get(update[1])
+            elif update[0] == "DefaultFunction":
                 delay = update[1]["delay"]
-                cycle = update[1]["next"]
+                cycle = default_functions.get(update[1]["next"], return_type=True)
                 res_manager.update_delay(name, delay, cycle)
+                update_function = default_functions.get(update[1]["rule"])
             else:
                 print "Unknown Update:", update
                 return
@@ -65,6 +65,12 @@ def _handle_request(request_content):
             tock()
     elif func == "reset":
         reset()
+    elif func == "set_res_value":
+        name, value = param
+        res_manager.set_res_value(name, value)
+    elif func == "modify_res_value":
+        name, delta = param
+        res_manager.modify_value(name, delta)
     else:
         print "unknown function:", func
         return

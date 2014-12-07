@@ -38,6 +38,13 @@ class Res:
             new_value = self.update_func(self.get_value(), param)
         self.set_value(new_value)
 
+    def modify_value(self, delta):
+        value = self.get_value();
+        if type(value) is int or type(value) is float:
+            self.set_value(value + delta)
+        else:
+            print "error at modify value"
+
     def set_value(self, value):
         self.value.append((Clock.get(), value))
 
@@ -171,4 +178,12 @@ def reset():
 
 
 def update_delay(name, delay, cycle, param=None):
-    add_timer_callback(Clock.get() + delay, lambda: update(name, cycle, param))
+    add_timer_callback(Clock.get() + delay, lambda: update(name, cycle(), param))
+
+
+def set_res_value(name, value):
+    return get_res(name).set_value(value)
+
+
+def modify_value(name, delta):
+    return get_res(name).modify_value(delta)
