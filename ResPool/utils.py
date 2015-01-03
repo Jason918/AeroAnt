@@ -110,10 +110,14 @@ def warp_update_value(func):
         p[f["parameter"]["@name"]] = warp_update_value(f["parameter"]["#text"])
     else:
         for param in f["parameter"]:
-            if param["@name"] in p:
-                p[param["@name"]] = [p[param["@name"]], warp_update_value(param["#text"])]
+            pname = param["@name"]
+            if pname in p: #TODO bug here ~~
+                if type(p[pname]) is list:
+                    p[pname].append(warp_update_value(param["#text"]))
+                else:
+                    p[pname] = [p[pname], warp_update_value(param["#text"])]
             else:
-                p[param["@name"]] = warp_update_value(param["#text"])
+                p[pname] = warp_update_value(param["#text"])
     return ret
 
 

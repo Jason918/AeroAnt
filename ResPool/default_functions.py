@@ -130,6 +130,7 @@ def get(data, return_type=None):
     else:
         if method == METHOD_OTHERS_COMBINE:
             sections = parameter["section"]
+            # print "sections:", sections
             method = lambda value: dict((section, get_value(section, value)) for section in sections)
         elif method == METHOD_OTHERS_DATA_LIST:
             data_list = parameter["data_list"]

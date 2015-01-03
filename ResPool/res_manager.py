@@ -26,17 +26,19 @@ class Res:
         #         v = model
         # else:
         #     print "full schema not support yet."
+        value = None
         if type(model) is dict and "initial" in model:
             value = model["initial"]
             if "format" in model:
                 format = model["format"]
                 if utils.is_string(value) and format in ["number", "dict", "str", "list"]:
                     log().debug("eval [value:%s] in [format:%s]", value, format)
-                    if len(value) == 0:
-                        value = None
-                    else:
+                    if len(value) > 0:
                         value = eval(value)
-            self.set_value(value)
+                    else:
+                        value = None
+        self.set_value(value)
+
 
     def update(self, param=None):
         if self.update_func is None:
@@ -78,7 +80,23 @@ class Res:
                 return item[1]
 
     def get_value_history(self):
-        return self.value
+        values = self.value
+        clk = Clock.get()
+        ret = [None] * clk
+        if values is None or len(values) == 0:
+            return
+        idx = 0
+        pre_value = None
+        for time, value in values:
+            while idx < time:
+                ret[idx] = pre_value
+                idx += 1
+            pre_value = value
+            ret[time] = value
+        while idx < clk:
+            ret[idx] = pre_value
+            idx += 1
+        return ret
 
 # format:
 # name -> res
