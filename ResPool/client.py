@@ -1,9 +1,81 @@
+import hashlib
+import json
+import threading
+import traceback
 import types
+from ResPool import protocal
 
 __author__ = 'jason'
+
+import sys
 import sky_client
 import utils
+import logging
+from protocal import *
 
+import logging.config
+
+logging.config.dictConfig({
+    'version': 1,
+    'disable_existing_loggers': False,  # this fixes the problem
+
+    'formatters': {
+        'standard': {
+            'format': '%(asctime)s [%(levelname)s] %(name)s: %(message)s'
+        },
+    },
+    'handlers': {
+        'default': {
+            'level': 'INFO',
+            'class': 'logging.StreamHandler',
+
+        },
+    },
+    'loggers': {
+        '': {
+            'handlers': ['default'],
+            'level': 'INFO',
+            'propagate': True
+        }
+    }
+})
+
+
+def log():
+    return logging.getLogger(__name__)
+
+
+def sky_request(func):
+    def wrapper(*args, **kwargs):
+        func(*args, **kwargs)
+
+        func_name = func.func_name
+        param = utils.get_func_arguments(func, args, kwargs)
+        log().info("CALL %s, param = %s", func_name, param)
+
+        sky_client.write(tuple=(TARGET, func_name, utils.encode(param)), fill_content_id=True)
+
+    return wrapper
+
+
+def sky_request_for_result(func):
+    def wrapper(*args, **kwargs):
+        func(*args, **kwargs)
+
+        func_name = func.func_name
+        param = utils.get_func_arguments(func, args, kwargs)
+        log().info("CALL %s, param = %s", func_name, param)
+
+        cid = sky_client.write(tuple=(TARGET, func_name, utils.encode(param)), fill_content_id=True)
+
+        result = sky_client.take(template=(RECEIVER, cid, "?"))
+        if result is None or len(result) < 3:
+            log().warn("request failed, cid=%s", cid)
+            log().debug("result=%s", str(result))
+            return
+        return utils.decode(result[RESULT_IDX_CONTENT])
+
+    return wrapper
 
 
 def add_res_from_file(file_path, file_type="xml"):
@@ -94,24 +166,44 @@ def add_res_from_file(file_path, file_type="xml"):
         print "unknown file_type"
         return
 
-    print "res number:", len(data["res_list"]["res"])
-    print data
+    log().info("res number:%d", len(data["res_list"]["res"]))
+    log().info("data=%s", data)
     ret = list()
     for res in data["res_list"]['res']:
+        log().debug("res:%s", res)
         name = res["@name"]
         model = res["model"]
+        model["initial"] = json.loads(model["initial"])
         update = res["update"]
-        add_res(name, model, utils.warp_update(update))
+
+        add_res(name, model, {'Default': utils.warp_update(update)})
         ret.append(name)
     return ret
 
 
+def add_res_with_update_preprocess(name, model, update):
+    """
+    An wrapper of __add_res. Do some pre-processing of update.
+    """
+
+    if utils.is_callable(update):
+        update_function = {protocal.FUNCTION_TYPE_CALLABLE, utils.function_to_string(update)}
+    elif type(update) is dict:
+        update_function = {protocal.FUNCTION_TYPE_DEFAULT: update}
+    else:
+        update_function = None
+        log().warn("invalid update function, update=%s", update)
+
+    add_res(name, model, update_function)
+
+
+@sky_request
 def add_res(name, model, update):
     """
     add a Res Object in ResPool
     :param name: name of the Res. Must be unique.
     :param model: model of the Res. This should be a dict containing:
-            model:
+            type:
             initial:
     :param update: update method of the Res. This value can be a function object, a dict or None.
         function: a function object or lambda object which accept the old value of this Res as the first parameter.
@@ -122,21 +214,12 @@ def add_res(name, model, update):
                 update : a default function;
             }
         None: no update function. This Res only can be modified by its default set function.
-    :return: true, if add resource is success.
+    :return: None
     """
-    update_function = None
-
-    if utils.is_function(update):
-        update_function = ["PythonFunctionObject", utils.function_to_string(update)]
-    elif type(update) is dict:
-        update_function = ["DefaultFunction", update]
-    else:
-        update_function = update
-
-    content = sky_client.get_content(["res_pool", "add_res", [name, model, update_function]])
-    sky_client.write(content)
+    pass
 
 
+@sky_request
 def modify_res_value(name, delta):
     """
     this res must be a number type.
@@ -144,80 +227,100 @@ def modify_res_value(name, delta):
     :param delta: change value.
     :return: None
     """
-    content = sky_client.get_content(["res_pool", "modify_res_value", [name, delta]], return_id=False)
-    sky_client.write(content)
+    pass
 
 
+@sky_request
 def set_res_value(name, value):
     """
     NOTICE this operation will override the auto-update result of the res.
     :param name:
-    :param value:
+    :param value:x
     :return:
     """
-    content = sky_client.get_content(["res_pool", "set_res_value", [name, value]], return_id=False)
-    sky_client.write(content)
+    pass
 
+
+@sky_request_for_result
 def get_res_value(name, clock=-1):
-    content, cid = sky_client.get_content(["res_pool", "get_res", [name, clock]], return_id=True)
-    sky_client.write(content)
-
-    result_template = sky_client.get_content(["res_pool_client", "get_res", cid, "?"])
-    result = sky_client.read(result_template)
-    if result is None or len(result) < 3:
-        print "update_res Failed"
-        return None
-    else:
-        return result[3]
+    pass
 
 
+@sky_request_for_result
+def get_res_values(name):
+    """
+    get all history value of this res.
+    :param name:
+    :return: value of length $clock
+    """
+    pass
+
+
+@sky_request
 def update_res(name, cycle=None, param=None):
-    content, cid = sky_client.get_content(["res_pool", "update_res", [name, cycle, param]], return_id=True)
-    sky_client.write(content)
-
-    result_template = sky_client.get_content(["res_pool_client", "update_res", cid, "?"])
-    result = sky_client.read(result_template)
-    if result is None or len(result) < 3:
-        print "update_res Failed"
-        return None
-    else:
-        return result[3]
+    pass
 
 
+@sky_request_for_result
 def get_clock():
-    content, cid = sky_client.get_content(["res_pool", "get_clock", []], return_id=True)
-    sky_client.write(content)
+    pass
 
-    result_template = sky_client.get_content(["res_pool_client", "get_clock", cid, "?"])
-    result = sky_client.read(result_template)
-    if result is None or len(result) < 3:
-        print "update_res Failed"
-        return None
-    else:
-        return result[3]
+
+@sky_request
+def ticktock(time=1):
+    pass
+
+
+@sky_request
+def reset_res_pool():
+    pass
 
 
 def register_listener(ref_res, condition, action):
-    condition_str = utils.function_to_string(condition)
-    action_str = utils.function_to_string(action)
-    tuple = ["res_pool", "add_listener", [ref_res, condition_str, action_str]]
-    content, cid = sky_client.get_content(tuple, return_id=True)
-    sky_client.write(content)
+    """
+    register an event listener,
+    :param ref_res: list of res names.
+    :param condition: can be an callable object, or One of Default Condition, see in default_condition.py
+    :param action: an callable object.
+    :return: event_id
+    """
 
-    result_template = sky_client.get_content(["res_pool_client", "add_listener", cid, "?"])
-    result = sky_client.read(result_template)
-    if result is None or len(result) < 3:
-        print "update_res Failed"
-        return None
+    if utils.is_callable(condition):
+        condition_dict = {protocal.FUNCTION_TYPE_CALLABLE: utils.function_to_string(condition)}
+        event_id = utils.calc_function_hash([condition])
     else:
-        return result[3]
+        condition_dict = {protocal.FUNCTION_TYPE_DEFAULT: condition}
+        event_id = condition + "@" + RECEIVER
+
+    event_book[event_id] = action
+    log().info("new event id:%s", event_id)
+    add_event_listener(event_id, ref_res, condition_dict)
 
 
-def ticktock(time):
-    content = sky_client.get_content(["res_pool", "ticktock", time])
-    sky_client.write(content)
+@sky_request
+def add_event_listener(event_id, ref_res, condition):
+    pass
 
 
-def reset_res_pool():
-    content = sky_client.get_content(["res_pool", "reset"])
-    sky_client.write(content)
+def __listen():
+    while True:
+        try:
+            event = sky_client.take((RECEIVER, "Event", "?"), timeout=10000)
+            if event is not None:
+                event_id = event[2]
+                action = event_book.get(event_id)
+                action()
+        except Exception as e:
+            log().error("handle Event exception, exception:%s\n%s\nevent=%s", e, traceback.format_exc(), event)
+
+
+__listen_thread = threading.Thread(target=__listen)
+event_book = dict()
+
+
+def init_listener():
+    __listen_thread.setDaemon(True)
+    __listen_thread.start()
+    # log().info("STARTED")
+    # event_id -> callable action
+

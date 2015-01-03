@@ -1,8 +1,11 @@
+import logging
+
 __author__ = 'jason'
 import requests
 import hashlib
 import json
 import base64
+import random
 
 SKY_SERVER = "http://127.0.0.1:9000"
 WRITE_URL = "/skyentry/write"
@@ -10,82 +13,78 @@ READ_URL = "/skyentry/read"
 TAKE_URL = "/skyentry/take"
 
 
-def __encode(item):
-    if item == "?":
-        return "?"
-    else:
-        json_str = json.dumps(item)
-        return base64.b64encode(json_str)
-
-
-def __decode(item):
-    if item == "?":
-        return "?"
-    else:
-        return json.loads(base64.b64decode(item))
+def log():
+    return logging.getLogger(__name__)
 
 
 def __handle_result(r, is_multi, return_id):
     ret = r.json()
     if not is_multi:
-
         if len(ret) != 1:
-            print "invalid ret:", ret
-            return None
-        ret = ret[0]
-        content = ret["content"].split(",")
-        result = map(__decode, content)
-
-        if return_id:
-            rid = hashlib.sha1(ret["content"]).hexdigest()
-            return result, rid
+            if return_id:
+                return None, None
+            else:
+                return None
         else:
-            return result
+            ret = ret[0]
+            content = ret["content"].split(",")
+            if return_id:
+                return content[0:-1], content[-1]
+            else:
+                return content
     else:
         print "not implement yet"
         return None
 
 
-def write(content, type=-1, expire=3000):
+def write(tuple, type=-1, expire=3000, fill_content_id=False):
+    content, cid = get_content(tuple, fill_content_id)
     param = {
         "content": content,
         "type": type,
         "expire": expire
     }
-    r = requests.get(SKY_SERVER + WRITE_URL, params=param)
-    return r.json()
+    log().debug("SKY_CLIENT[write],data=%s", param)
+    requests.post(SKY_SERVER + WRITE_URL, data=param)
+    return cid
 
 
-def read(content, is_multi=False, timeout=500, return_id=False):
+def read(template, is_multi=False, timeout=500, return_id=False):
+    content, cid = get_content(template, False)
     param = {
         "content": content,
         "isMulti": is_multi,
         "timeout": timeout
     }
-    r = requests.get(SKY_SERVER + READ_URL, params=param)
-
-    result = __handle_result(r, is_multi, return_id)
-    #print "READ:", result
-    return result
+    log().debug("SKY_CLIENT[read],data=%s", param)
+    r = requests.post(SKY_SERVER + READ_URL, data=param)
+    return __handle_result(r, is_multi, return_id)
 
 
-def take(content, is_multi=False, timeout=500, return_id=False):
+def take(template, is_multi=False, timeout=500, return_id=False):
+    content, cid = get_content(template, False)
     param = {
         "content": content,
         "isMulti": is_multi,
         "timeout": timeout
     }
-    r = requests.get(SKY_SERVER + TAKE_URL, params=param)
-    result = __handle_result(r, is_multi, return_id)
-    print "TAKE:", result
-    return result
+    log().debug("SKY_CLIENT[take],data=%s", param)
+    r = requests.post(SKY_SERVER + TAKE_URL, data=param)
+    return __handle_result(r, is_multi, return_id)
 
 
-def get_content(item_list, return_id=False):
+def get_content(item_list, fill_content_id=True):
+    """
+    this will append content_id in result!
+    :param item_list:
+    :param return_id:
+    :return: content , content_id
+    """
     #print "get_content:", item_list, return_id
-    content = ",".join(map(__encode, item_list))
-    if return_id:
-        cid = hashlib.sha1(content).hexdigest()
-        return content, cid
-    else:
-        return content
+    # content = ",".join(map(__encode, item_list))
+
+    content = ",".join(item_list or [])
+    content_id = hashlib.sha1(content + str(random.random())).hexdigest()
+    if fill_content_id:
+        content = content + "," + content_id
+    return content, content_id

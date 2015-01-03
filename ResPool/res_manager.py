@@ -1,3 +1,5 @@
+import logging
+
 __author__ = 'jason'
 
 from lxml.builder import E
@@ -5,6 +7,11 @@ from lxml.etree import tostring
 from clock import Clock
 import types
 import utils
+
+
+def log():
+    return logging.getLogger(__name__)
+
 
 class Res:
     def __init__(self, name, model, update_func):
@@ -23,12 +30,20 @@ class Res:
             value = model["initial"]
             if "format" in model:
                 format = model["format"]
-                if type(format) is str and format in ["number", "dict", "str", "list"]:
-                    print "eval value in format", format
-                    value = eval(value)
+                if utils.is_string(value) and format in ["number", "dict", "str", "list"]:
+                    log().debug("eval [value:%s] in [format:%s]", value, format)
+                    if len(value) == 0:
+                        value = None
+                    else:
+                        value = eval(value)
             self.set_value(value)
 
     def update(self, param=None):
+        if self.update_func is None:
+            return
+        if not utils.is_callable(self.update_func):
+            log().warn("update_func of res[%s] is not callable, update_func=%s", self.name, self.update_func)
+            return
         arg_cnt = self.update_func.__code__.co_argcount
         if arg_cnt == 0:
             new_value = self.update_func()
@@ -39,14 +54,16 @@ class Res:
         self.set_value(new_value)
 
     def modify_value(self, delta):
-        value = self.get_value();
+        value = self.get_value()
         if type(value) is int or type(value) is float:
             self.set_value(value + delta)
         else:
             print "error at modify value"
 
     def set_value(self, value):
-        self.value.append((Clock.get(), value))
+        clk = Clock.get()
+        #if len(self.value) > 1 and self.value[-1][0] == clk:
+        self.value.append((clk, value))
 
     def get_value(self, clock=-1):
         cur = Clock.get()
@@ -59,6 +76,9 @@ class Res:
         for item in reversed(self.value):
             if item[0] <= clock:
                 return item[1]
+
+    def get_value_history(self):
+        return self.value
 
 # format:
 # name -> res
@@ -90,7 +110,12 @@ def get_res(name):
 
 
 def get(name, clock=-1):
-    return get_res(name).get_value(clock)
+    res = get_res(name)
+    if res is None:
+        log().warn("get res failed, name=%s", name)
+        return None
+    else:
+        return res.get_value(clock)
 
 
 def add(name, model, update_func):
@@ -102,7 +127,7 @@ def update(name, cycle=None, param=None):
     res = get_res(name)
     res.update(param)
     if cycle is not None:
-        add_timer_callback(Clock.get() + cycle, lambda: update(name, cycle, param))
+        add_timer_callback(Clock.get() + cycle(), lambda: update(name, cycle, param))
 
 
 def add_listener(res_list, condition, action):
@@ -147,7 +172,7 @@ def run_listener():
 
     for listener_id in listener_id_set:
         if listener_id in listeners:
-            (res_list, condition, action) = listeners.get(listener_id)
+            res_list, condition, action = listeners.get(listener_id)
             if condition():
                 action()
 
@@ -178,7 +203,7 @@ def reset():
 
 
 def update_delay(name, delay, cycle, param=None):
-    add_timer_callback(Clock.get() + delay, lambda: update(name, cycle(), param))
+    add_timer_callback(Clock.get() + delay, lambda: update(name, cycle, param))
 
 
 def set_res_value(name, value):
@@ -187,3 +212,28 @@ def set_res_value(name, value):
 
 def modify_value(name, delta):
     return get_res(name).modify_value(delta)
+
+
+def get_all(name):
+    return get_res(name).get_value_history()
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

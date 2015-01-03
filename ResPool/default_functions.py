@@ -15,11 +15,13 @@ METHOD_MATH_LINEAR = "math_expression#linear"
 METHOD_MATH_SIN = "math_expression#sin"
 METHOD_MATH_LOG = "math_expression#log"
 METHOD_MATH_SUM = "math_expression#sum"
+
 # type = probability
 PROBABILITY_PREFIX = "probability"
 METHOD_PROBABILITY_MARKOV_CHAIN = "probability#markov_chain"
 METHOD_PROBABILITY_SIMPLE_RAND = "probability#simple_rand"
 METHOD_PROBABILITY_NORMAL_VARIATE_RAND = "probability#normal_variate_rand"
+
 #type = others
 METHOD_OTHERS_COMBINE = "others#combine"
 METHOD_OTHERS_DATA_LIST = "others#data_list"
@@ -47,30 +49,27 @@ def markov_chain(value, states, init_state, transform):
 
 
 def get_value(value, v):
-    if utils.is_function(value):
+    if utils.is_callable(value):
         return value()
-    elif value == "$slef":
+    elif value == "$self":
         return v
     elif value == "$clock":
         return Clock.get()
-    elif value.startswith("$"):
+    elif utils.is_string(value) and value.startswith("$"):
         return res_manager.get(value[1:])
     else:
         return value
 
 
 def get(data, return_type=None):
-    if "function" not in data:
+    if type(data) is not dict or "method" not in data:
         if return_type is None:
             return data
         elif return_type == "lambda":
             return lambda: data
+        else:
+            return None
 
-    data = data["function"]
-
-    if "method" not in data:
-        print "invalid data for default method"
-        return
     method = data["method"]
     parameter = data["parameter"]
 
@@ -131,7 +130,7 @@ def get(data, return_type=None):
     else:
         if method == METHOD_OTHERS_COMBINE:
             sections = parameter["section"]
-            method = lambda value: dict((section['name'], get_value(section['value'], value)) for section in sections)
+            method = lambda value: dict((section, get_value(section, value)) for section in sections)
         elif method == METHOD_OTHERS_DATA_LIST:
             data_list = parameter["data_list"]
             method = lambda value: data_list[Clock.get() % len(data_list)]

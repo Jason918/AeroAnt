@@ -1,4 +1,5 @@
 from time import sleep
+from ResPool import default_condition
 from ResPool.clock import Clock
 from res_manager import *
 
@@ -7,6 +8,36 @@ import default_functions
 __author__ = 'jason'
 import client
 from random import random
+import logging.config
+
+logging.config.dictConfig({
+    'version': 1,
+    'disable_existing_loggers': True,  # this fixes the problem
+
+    'formatters': {
+        'standard': {
+            'format': '%(asctime)s [%(levelname)s] %(name)s: %(message)s'
+        },
+    },
+    'handlers': {
+        'default': {
+            'level': 'DEBUG',
+            'class': 'logging.StreamHandler',
+            'formatter': 'standard'
+        },
+    },
+    'loggers': {
+        '': {
+            'handlers': ['default'],
+            'level': 'INFO',
+            'propagate': True
+        }
+    }
+})
+
+
+def log():
+    return logging.getLogger(__name__)
 
 
 client.reset_res_pool()
@@ -15,14 +46,21 @@ client.reset_res_pool()
 def test_xml_load():
     print "testing xml load"
     names = client.add_res_from_file("../res.xml")
-    for i in range(1):
+    log().info("clock:%d", client.get_clock())
+    client.init_listener()
+    client.register_listener([], default_condition.CONDITION_CLOCK_TICK, action)
+    for i in range(10):
         client.ticktock(1)
-        sleep(1)
-        print
-        print "clock:", client.get_clock()
+        sleep(5)
+        log().info("clock:%d", client.get_clock())
         for name in names:
-            print name, ":", client.get_res_value(name)
+            log().info("%s = %s", name, client.get_res_value(name))
 
+log().info("clock:%d", client.get_clock())
+
+
+def action():
+    print "HELLO world, @CLOCK:", client.get_clock()
 
 test_xml_load()
 
@@ -81,9 +119,12 @@ def test_old():
         # def alert():
         # print "WARNING!!!!!!temp=", get(temp), "humidity:", get(hum)
         #
-        #
-        # lid = add_listener([temp, hum], lambda: get(temp) > 30 or get(hum) < 0.4, alert)
+        # lid = client.add_listener(["temp", "hum"],
+        # lambda: get(temp) > 30 or get(hum) < 0.4,
+        # alert)
         # tock()
+
+
         #
         # for i in range(10):
         #     tick()

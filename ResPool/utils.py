@@ -1,4 +1,5 @@
 from collections import defaultdict
+import json
 import marshal
 import hashlib
 import types
@@ -33,7 +34,7 @@ def get_list(dic, key):
 def function_to_string(func):
     if func is None:
         return None
-    if not is_function(func):
+    if not is_callable(func):
         raise Exception("func is not callable!")
     code_str = marshal.dumps(func.func_code)
     return base64.b64encode(code_str)
@@ -50,7 +51,7 @@ def string_to_function(string, function_name="func"):
     return func
 
 
-def is_function(func):
+def is_callable(func):
     return hasattr(func, '__call__')
 
 
@@ -96,14 +97,17 @@ def warp_update_value(func):
     }
     """
     if "function" not in func:
-        return func
+        if is_string(func) and not func.startswith("$"):
+            return json.loads(func)
+        else:
+            return func
     ret = dict()
     f = func["function"]
     ret["method"] = f["@type"] + "#" + f["@name"]
     p = dict()
     ret["parameter"] = p
     if type(f["parameter"]) is not list:
-        p[f["parameter"]["@name"]] = f["parameter"]["#text"]
+        p[f["parameter"]["@name"]] = warp_update_value(f["parameter"]["#text"])
     else:
         for param in f["parameter"]:
             if param["@name"] in p:
@@ -119,3 +123,37 @@ def warp_update(update):
     ret["next"] = warp_update_value(update["next"])
     ret["rule"] = warp_update_value(update["rule"])
     return ret
+
+
+def get_func_arguments(func, args, kwargs):
+    arg_cnt = func.func_code.co_argcount
+    arg_defaults = func.func_defaults
+    arg_names = func.func_code.co_varnames
+    # if len(args) + len(kwargs) +  != arg_cnt:
+    # log().error("argument count not match, args = %s, kwargs = %s, argcount = %d", args, kwargs, arg_cnt)
+    # return
+    param = dict().fromkeys(func.func_code.co_varnames[0:arg_cnt])
+    if arg_defaults is not None:
+        for i in range(len(arg_defaults)):
+            param[arg_names[arg_cnt - len(arg_defaults) + i]] = arg_defaults[i]
+
+    if args is not None:
+        for i in range(len(args)):
+            param[arg_names[i]] = args[i]
+
+    if kwargs is not None:
+        for k, v in kwargs.items():
+            param[k] = v
+    return param
+
+
+def decode(obj):
+    return json.loads(base64.b64decode(obj))
+
+
+def encode(obj):
+    return base64.b64encode(json.dumps(obj))
+
+
+def is_string(string):
+    return isinstance(string, basestring)
