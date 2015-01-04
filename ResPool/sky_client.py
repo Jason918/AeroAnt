@@ -18,6 +18,9 @@ def log():
 
 
 def __handle_result(r, is_multi, return_id):
+    if r.status_code != 200:
+        log().error("request failed, status code = %d", r.status_code)
+        return
     ret = r.json()
     if not is_multi:
         if len(ret) != 1:

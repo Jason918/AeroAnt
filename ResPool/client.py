@@ -68,7 +68,7 @@ def sky_request_for_result(func):
 
         cid = sky_client.write(tuple=(TARGET, func_name, utils.encode(param)), fill_content_id=True)
 
-        result = sky_client.take(template=(RECEIVER, cid, "?"))
+        result = sky_client.take(template=(RECEIVER, cid, "?"), timeout=1000)
         if result is None or len(result) < 3:
             log().warn("request failed, cid=%s", cid)
             log().debug("result=%s", str(result))
@@ -271,7 +271,7 @@ def ticktock(time=1):
     pass
 
 
-@sky_request
+@sky_request_for_result
 def reset_res_pool():
     pass
 

@@ -45,13 +45,14 @@ client.reset_res_pool()
 
 def test_xml_load():
     print "testing xml load"
-    names = client.add_res_from_file("../res.xml")
+    names = client.add_res_from_file("../res_list.xml")
+    sleep(2)
     log().info("clock:%d", client.get_clock())
     client.init_listener()
     client.register_listener([], default_condition.CONDITION_CLOCK_TICK, action)
     for i in range(10):
         client.ticktock(1)
-        sleep(5)
+        sleep(2)
         log().info("clock:%d", client.get_clock())
         for name in names:
             log().info("%s = %s", name, client.get_res_value(name))
