@@ -92,7 +92,8 @@ class Res:
                 ret[idx] = pre_value
                 idx += 1
             pre_value = value
-            ret[time] = value
+            if time < clk:
+                ret[time] = value
         while idx < clk:
             ret[idx] = pre_value
             idx += 1
