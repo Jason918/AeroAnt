@@ -3,7 +3,7 @@ import json
 import threading
 import traceback
 import types
-from ResPool import protocal
+import protocal
 
 __author__ = 'jason'
 
@@ -68,7 +68,7 @@ def sky_request_for_result(func):
 
         cid = sky_client.write(tuple=(TARGET, func_name, utils.encode(param)), fill_content_id=True)
 
-        result = sky_client.take(template=(RECEIVER, cid, "?"), timeout=1000)
+        result = sky_client.take(template=(RECEIVER, cid, "?"))
         if result is None or len(result) < 3:
             log().warn("request failed, cid=%s", cid)
             log().debug("result=%s", str(result))

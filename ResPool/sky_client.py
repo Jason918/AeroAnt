@@ -40,7 +40,7 @@ def __handle_result(r, is_multi, return_id):
         return None
 
 
-def write(tuple, type=-1, expire=3000, fill_content_id=False):
+def write(tuple, type=-1, expire=5000, fill_content_id=False):
     content, cid = get_content(tuple, fill_content_id)
     param = {
         "content": content,
@@ -64,7 +64,7 @@ def read(template, is_multi=False, timeout=500, return_id=False):
     return __handle_result(r, is_multi, return_id)
 
 
-def take(template, is_multi=False, timeout=500, return_id=False):
+def take(template, is_multi=False, timeout=5000, return_id=False):
     content, cid = get_content(template, False)
     param = {
         "content": content,

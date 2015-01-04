@@ -52,7 +52,7 @@ def test_xml_load():
     client.register_listener([], default_condition.CONDITION_CLOCK_TICK, action)
     for i in range(10):
         client.ticktock(1)
-        sleep(2)
+        sleep(1)
         log().info("clock:%d", client.get_clock())
         for name in names:
             log().info("%s = %s", name, client.get_res_value(name))
