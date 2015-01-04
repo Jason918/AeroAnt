@@ -15,6 +15,7 @@ METHOD_MATH_LINEAR = "math_expression#linear"
 METHOD_MATH_SIN = "math_expression#sin"
 METHOD_MATH_LOG = "math_expression#log"
 METHOD_MATH_SUM = "math_expression#sum"
+METHOD_MATH_MEAN = "math_expression#mean"
 
 # type = probability
 PROBABILITY_PREFIX = "probability"
@@ -109,6 +110,13 @@ def get(data, return_type=None):
             b = get(parameter["b"])
             x = get(parameter["x"])
             method = lambda value: get_value(a, value) * math.log(get_value(x, value)) + get_value(b, value)
+        elif method == METHOD_MATH_MEAN:
+            terms = parameter["term"]
+            method = lambda value: 1.0 * sum([get_value(term, value) for term in terms]) / len(terms)
+        elif method == METHOD_MATH_SUM:
+            terms = parameter["term"]
+            #print terms
+            method = lambda value: sum([get_value(term, value) for term in terms])
         else:
             print "not support method:", method
     elif method.startswith(PROBABILITY_PREFIX):
@@ -124,7 +132,7 @@ def get(data, return_type=None):
         elif method == METHOD_PROBABILITY_SIMPLE_RAND:
             min_value = get(parameter["min"])
             max_value = get(parameter["max"])
-            method = lambda value: randint(get_value(min_value, value), get_value(max_value,value))
+            method = lambda value: randint(get_value(min_value, value), get_value(max_value, value))
         else:
             print "not support method:", method
     else:

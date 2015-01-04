@@ -45,17 +45,17 @@ def log():
     return logging.getLogger(__name__)
 
 
-def sky_request(func):
-    def wrapper(*args, **kwargs):
-        func(*args, **kwargs)
-
-        func_name = func.func_name
-        param = utils.get_func_arguments(func, args, kwargs)
-        log().info("CALL %s, param = %s", func_name, param)
-
-        sky_client.write(tuple=(TARGET, func_name, utils.encode(param)), fill_content_id=True)
-
-    return wrapper
+# def sky_request(func):
+#     def wrapper(*args, **kwargs):
+#         func(*args, **kwargs)
+#
+#         func_name = func.func_name
+#         param = utils.get_func_arguments(func, args, kwargs)
+#         log().info("CALL %s, param = %s", func_name, param)
+#
+#         sky_client.write(tuple=(TARGET, func_name, utils.encode(param)), fill_content_id=True)
+#
+#     return wrapper
 
 
 def sky_request_for_result(func):
@@ -76,6 +76,8 @@ def sky_request_for_result(func):
         return utils.decode(result[RESULT_IDX_CONTENT])
 
     return wrapper
+
+sky_request = sky_request_for_result
 
 
 def add_res_from_file(file_path, file_type="xml"):

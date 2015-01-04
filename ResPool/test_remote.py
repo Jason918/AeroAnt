@@ -48,8 +48,8 @@ def test_xml_load():
     names = client.add_res_from_file("../res_list.xml")
     sleep(2)
     log().info("clock:%d", client.get_clock())
-    client.init_listener()
-    client.register_listener([], default_condition.CONDITION_CLOCK_TICK, action)
+    #client.init_listener()
+    #client.register_listener([], default_condition.CONDITION_CLOCK_TICK, action)
     for i in range(10):
         client.ticktock(1)
         sleep(1)

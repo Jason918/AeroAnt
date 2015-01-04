@@ -20,6 +20,24 @@
         </update>
     </res>
 
+    <res name="time">
+        <model>
+            <format>string</format>
+            <initial>"daytime"</initial>
+        </model>
+        <update>
+            <delay>1</delay>
+            <next>3</next>
+            <rule>
+                <function name="markov_chain" type="probability">
+                    <parameter name="state_set">["daytime","night"]</parameter>
+                    <parameter name="init_state">"daytime"</parameter>
+                    <parameter name="trans_matrix">[[0,1],[1,0]]</parameter>
+                </function>
+            </rule>
+        </update>
+    </res>
+
     <res name="weather">
         <model>
             <format>
@@ -238,7 +256,7 @@
             </rule>
         </update>
     </res>
-    <res name="computer.bri">
+    <res name="computer.brightness">
         <model>
             <format>number</format>
             <initial>1</initial>
@@ -251,7 +269,7 @@
             </rule>
         </update>
     </res>
-    <res name="computer.vol">
+    <res name="computer.volume">
         <model>
             <format>number</format>
             <initial>1</initial>
@@ -275,8 +293,8 @@
             <rule>
                 <function name="combine" type="others">
                     <parameter name="section">$computer.power</parameter>
-                    <parameter name="section">$computer.bri</parameter>
-                    <parameter name="section">$computer.vol</parameter>
+                    <parameter name="section">$computer.brightness</parameter>
+                    <parameter name="section">$computer.volume</parameter>
                 </function>
             </rule>
         </update>
@@ -295,7 +313,7 @@
             </rule>
         </update>
     </res>
-    <res name="tv.bri">
+    <res name="tv.brightness">
         <model>
             <format>number</format>
             <initial>1</initial>
@@ -308,7 +326,7 @@
             </rule>
         </update>
     </res>
-    <res name="tv.vol">
+    <res name="tv.volume">
         <model>
             <format>number</format>
             <initial>1</initial>
@@ -332,8 +350,8 @@
             <rule>
                 <function name="combine" type="others">
                     <parameter name="section">$tv.power</parameter>
-                    <parameter name="section">$tv.bri</parameter>
-                    <parameter name="section">$tv.vol</parameter>
+                    <parameter name="section">$tv.brightness</parameter>
+                    <parameter name="section">$tv.volume</parameter>
                 </function>
             </rule>
         </update>
@@ -398,10 +416,10 @@
             <delay>1</delay>
             <next>1</next>
             <rule>
-                <function name="combine" type="others">
-                    <parameter name="section">$env.brightness</parameter>
-                    <parameter name="section">$computer.brightness</parameter>
-                    <parameter name="section">$tv.brightness</parameter>
+                <function name="sum" type="math_expression">
+                    <parameter name="term">$env.brightness</parameter>
+                    <parameter name="term">$computer.brightness</parameter>
+                    <parameter name="term">$tv.brightness</parameter>
                 </function>
             </rule>
         </update>
@@ -432,10 +450,10 @@
             <delay>1</delay>
             <next>1</next>
             <rule>
-                <function name="combine" type="others">
-                    <parameter name="section">$env.volume</parameter>
-                    <parameter name="section">$computer.volume</parameter>
-                    <parameter name="section">$tv.volume</parameter>
+                <function name="sum" type="math_expression">
+                    <parameter name="term">$env.volume</parameter>
+                    <parameter name="term">$computer.volume</parameter>
+                    <parameter name="term">$tv.volume</parameter>
                 </function>
             </rule>
         </update>
@@ -455,6 +473,71 @@
                     <parameter name="max">5</parameter>
                 </function>
             </rule>
+        </update>
+    </res>
+
+    <res name="goal_overall">
+        <model>
+            <format>number</format>
+            <initial>0</initial>
+        </model>
+        <update>
+            <delay>1</delay>
+            <next>1</next>
+            <rule>
+                null
+            </rule>
+        </update>
+    </res>
+    <res name="goal_security">
+        <model>
+            <format>number</format>
+            <initial>0</initial>
+        </model>
+        <update>
+            <delay>1</delay>
+            <next>1</next>
+            <rule>
+                null
+            </rule>
+        </update>
+    </res>
+    <res name="goal_comfort">
+        <model>
+            <format>number</format>
+            <initial>0</initial>
+        </model>
+        <update>
+            <delay>1</delay>
+            <next>1</next>
+            <rule>
+                null
+            </rule>
+        </update>
+    </res>
+    <res name="goal_energy">
+        <model>
+            <format>number</format>
+            <initial>0</initial>
+        </model>
+        <update>
+            <delay>1</delay>
+            <next>1</next>
+            <rule>
+                null
+            </rule>
+        </update>
+    </res>
+
+    <res name="rule_id">
+        <model>
+            <format>dict</format>
+            <initial>null</initial>
+        </model>
+        <update>
+            <delay>1</delay>
+            <next>1</next>
+            <rule>null</rule>
         </update>
     </res>
 </res_list>
