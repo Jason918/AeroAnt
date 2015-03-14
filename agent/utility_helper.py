@@ -9,8 +9,9 @@ class Res:
     def __init__(self,name,value=0):
         self.name=name
         self.value=value
+        self.isnew=True
 
-    #@classmethod
+    @classmethod
     def Getvalue(self,name,clock):
         return client.get_res_value(name, clock)
 
@@ -20,11 +21,15 @@ class Res:
 
     def update_value(self, clock=-1):
         self.value=client.get_res_value(self.name, clock)
+        self.isnew=True
         return self.value
     def set_value(self,value):
         self.value=value
+        self.isnew=False
     def uploading_value(self):
-        client.set_res_value(self.name,self.value)
+        if self.isnew==False:
+            client.set_res_value(self.name,self.value)
+            print "i am uploading the value of "+ self.name
 
 
 class Capability:
@@ -176,44 +181,48 @@ class Role:
         else:
             temperature=outsidetemperature+airconlevel*(airmode-0.5)*2/2+heaterlevel/2
 
-        print "temperature:"+str(temperature)
+
         intpower=int(power)
         intbrightness=int(brightness)
         inttemperature=int(temperature)
-        client.set_res_value("temperature",temperature)
+        #client.set_res_value("temperature",temperature)
+        Res_list[self.name]["temperature"].set_value(temperature)
+        #client.set_res_value("power",intpower)
+        Res_list[self.name]["power"].set_value(intpower)
+        #client.set_res_value("brightness",intbrightness)
+        Res_list[self.name]["brightness"].set_value(intbrightness)
 
-        client.set_res_value("power",intpower)
 
-        client.set_res_value("brightness",intbrightness)
-
-        print "get power:"+str(client.get_res_value("power",-1))
-        print "get temperature:"+str(client.get_res_value("temperature",-1))
-        print "get brightness:"+str(client.get_res_value("brightness",-1))
 
 
 
         es=1-intpower/4
-        client.set_res_value("room:goal_energy",es)
+        #client.set_res_value("room:goal_energy",es)
+        Res_list[self.name]["room:goal_energy"].set_value(es)
 
         ec=intpower/2
         if ec >1:
             ec=1
-        client.set_res_value("room:goal_effective_control",ec)
+        #client.set_res_value("room:goal_effective_control",ec)
+        Res_list[self.name]["room:goal_effective_control"].set_value(ec)
 
         if intbrightness<3:
             vc=intbrightness/2
         else:
             vc=2.5-intbrightness/2
-        client.set_res_value("room:goal_visual_comfort",vc)
+        #client.set_res_value("room:goal_visual_comfort",vc)
+        Res_list[self.name]["room:goal_visual_comfort"].set_value(vc)
 
         if inttemperature<=2:
             tc=inttemperature/2
         else:
             tc=(5-inttemperature)/3
-        client.set_res_value("room:goal_thermal_comfort",tc)
+        #client.set_res_value("room:goal_thermal_comfort",tc)
+        Res_list[self.name]["room:goal_thermal_comfort"].set_value(tc)
 
         og=(es+ec+vc+tc)/4
-        client.set_res_value("room:goal_overall",og)
+        #client.set_res_value("room:goal_overall",og)
+        Res_list[self.name]["room:goal_overall"].set_value(og)
 
 
 

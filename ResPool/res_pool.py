@@ -1,7 +1,7 @@
 import logging
 import traceback
 import time
-from ResPool import protocal
+import protocal #from ResPool import protocal
 
 __author__ = 'jason'
 
