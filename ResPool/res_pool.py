@@ -112,17 +112,9 @@ __clock_tick_event_receiver = list()
 __on_tick = False
 
 
-def timing(f):
-    def wrap(*args):
-        time1 = time.time()
-        ret = f(*args)
-        time2 = time.time()
-        print '%s function took %0.3f ms' % (f.func_name, (time2 - time1) * 1000.0)
-        return ret
-    return wrap
 
 
-@timing
+@utils.timing
 def tick_or_tock():
     global __on_tick
     if not __on_tick:
@@ -131,8 +123,8 @@ def tick_or_tock():
         __on_tick = True
         if len(__clock_tick_event_receiver) > 0:
             for receiver in __clock_tick_event_receiver:
-                notify_id = sky_client.write((RECEIVER, "Event", receiver))
-                sky_client.take(template=(TARGET, notify_id, '?'))
+                notify_id = sky_client.write((RECEIVER, "Event", receiver),fill_content_id=True)
+                #sky_client.take(template=(TARGET, notify_id, '?'))
     else:
         res_manager.run_listener()
         Clock.tick()

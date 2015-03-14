@@ -1,4 +1,5 @@
 from collections import defaultdict
+import time
 import json
 import marshal
 import hashlib
@@ -53,6 +54,15 @@ def string_to_function(string, function_name="func"):
 
 def is_callable(func):
     return hasattr(func, '__call__')
+
+def timing(f):
+    def wrap(*args):
+        time1 = time.time()
+        ret = f(*args)
+        time2 = time.time()
+        print '%s function took %0.3f ms' % (f.func_name, (time2 - time1) * 1000.0)
+        return ret
+    return wrap
 
 
 def get_data_from_xml(file_path):

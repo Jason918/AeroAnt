@@ -303,16 +303,19 @@ def register_listener(ref_res, condition, action):
 def add_event_listener(event_id, ref_res, condition):
     pass
 
+@utils.timing
+def run_action(action):
+    return action()
 
 def __listen():
     while True:
         try:
-            event, notify_id = sky_client.take((RECEIVER, "Event", "?"), timeout=10000, return_id=True)
+            event, notify_id = sky_client.take((RECEIVER, "Event", "?", "?"), timeout=10000, return_id=True)
             if event is not None:
                 event_id = event[2]
                 action = event_book.get(event_id)
-                ret = action()
-                sky_client.write(tuple=(TARGET, notify_id, ret))
+                ret = run_action(action)
+                #sky_client.write(tuple=(TARGET, notify_id, utils.encode(ret)))
         except Exception as e:
             log().error("handle Event exception, exception:%s\n%s\nevent=%s", e, traceback.format_exc(), event)
 
