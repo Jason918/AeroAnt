@@ -11,6 +11,7 @@ SKY_SERVER = "http://127.0.0.1:9000"
 WRITE_URL = "/skyentry/write"
 READ_URL = "/skyentry/read"
 TAKE_URL = "/skyentry/take"
+RESET_URL = "/skyentry/reset"
 
 
 def log():
@@ -91,3 +92,8 @@ def get_content(item_list, fill_content_id=True):
     if fill_content_id:
         content = content + "," + content_id
     return content, content_id
+
+
+def reset():
+    r = requests.post(SKY_SERVER + RESET_URL)
+    return r.status_code == 200

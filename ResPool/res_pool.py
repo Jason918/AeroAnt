@@ -21,6 +21,7 @@ def log():
 
 
 def reset():
+    sky_client.reset()
     res_manager.reset()
     Clock.reset()
 
@@ -105,6 +106,7 @@ def __res_server__():
 
 def start():
     # __server_thread__.start()
+    reset()
     __res_server__()
 
 

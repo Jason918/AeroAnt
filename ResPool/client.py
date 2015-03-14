@@ -71,7 +71,7 @@ def sky_request_for_result(func):
         result = sky_client.take(template=(RECEIVER, cid, "?"))
         if result is None or len(result) < 3:
             log().warn("request failed, cid=%s", cid)
-            log().debug("result=%s", str(result))
+            log().warn("result=%s", str(result))
             return
         return utils.decode(result[RESULT_IDX_CONTENT])
 
