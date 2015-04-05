@@ -173,6 +173,16 @@ def remove_listener(listener_id):
         res_to_listener[name].remove(listener_id)
 
 
+def get_next_update_time():
+    while len(timers) > 0:
+        t = min(timers)
+        if t < Clock.get():
+            timers.pop(t, None)
+        else:
+            return t
+    return -1
+
+
 def run_timer():
     clk = Clock.get()
     if clk not in timers:
@@ -180,6 +190,7 @@ def run_timer():
     callback_list = timers[clk]
     for callback in callback_list:
         callback()
+    timers.pop(clk, None)
 
 
 def run_listener():
@@ -237,22 +248,9 @@ def get_all(name):
     return get_res(name).get_value_history()
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+def delete_res(name):
+    r = pool.pop(name, None)
+    if r is None:
+        return False
+    else:
+        return True

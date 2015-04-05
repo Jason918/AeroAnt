@@ -162,26 +162,23 @@ def add_res_from_file(file_path, file_type="xml"):
     :param file_type: only support xml for now.
     :return:
     """
+
     if file_type == "xml":
-        data = utils.get_data_from_xml(file_path)
+        with open(file_path, "r") as fin:
+            context = fin.read()
+            add_res_from_xml_context(context)
     else:
         print "unknown file_type"
-        return
 
-    log().info("res number:%d", len(data["res_list"]["res"]))
-    log().info("data=%s", data)
-    ret = list()
-    for res in data["res_list"]['res']:
-        log().debug("res:%s", res)
-        name = res["@name"]
-        model = res["model"]
-        model["initial"] = json.loads(model["initial"])
-        update = res["update"]
 
-        add_res(name, model, {'Default': utils.warp_update(update)})
-        ret.append(name)
-    return ret
-
+@sky_request
+def add_res_from_xml_context(context):
+    """
+    similar with add_res_from_file(file).
+    :param context: xml context.
+    :return:
+    """
+    pass
 
 def add_res_with_update_preprocess(name, model, update):
     """
@@ -220,6 +217,9 @@ def add_res(name, model, update):
     """
     pass
 
+@sky_request
+def delete_res(name):
+    pass
 
 @sky_request
 def modify_res_value(name, delta):

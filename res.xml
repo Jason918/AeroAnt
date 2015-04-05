@@ -13,15 +13,25 @@
                 1
             </delay>
             <next>
-                5
+                3
             </next>
             <rule>
-                <function name="simple_rand" type="probability">
-                    <parameter name="min">-40</parameter>
-                    <parameter name="max">50</parameter>
+                <function name="approach" type="others">
+                    <parameter name="step">3</parameter>
+                    <parameter name="target">$AirCondition</parameter>
                 </function>
             </rule>
         </update>
+    </res>
+    <res name="AirCondition">
+        <model>
+            <format>
+                number
+            </format>
+            <initial>
+                100
+            </initial>
+        </model>
     </res>
     <res name="humidity">
         <model>
@@ -34,7 +44,7 @@
         </model>
         <update>
             <delay>
-                1
+                5
             </delay>
             <next>
                 1
@@ -59,7 +69,7 @@
         </model>
         <update>
             <delay>
-                1
+                5
             </delay>
             <next>
                 1
@@ -85,7 +95,7 @@
         </model>
         <update>
             <delay>
-                1
+                5
             </delay>
             <next>
                 3
@@ -99,6 +109,7 @@
             </rule>
         </update>
     </res>
+
     <res name="sensor">
         <model>
             <format>
@@ -110,7 +121,7 @@
         </model>
         <update>
             <delay>
-                1
+                5
             </delay>
             <next>
                 5

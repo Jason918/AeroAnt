@@ -26,6 +26,7 @@ METHOD_PROBABILITY_NORMAL_VARIATE_RAND = "probability#normal_variate_rand"
 #type = others
 METHOD_OTHERS_COMBINE = "others#combine"
 METHOD_OTHERS_DATA_LIST = "others#data_list"
+METHOD_OTHERS_APPROACH = "others#approach"
 
 from time import strftime
 from clock import Clock
@@ -49,7 +50,7 @@ def markov_chain(value, states, init_state, transform):
         index += 1
 
 
-def get_value(value, v):
+def get_value(value, v=None):
     if utils.is_callable(value):
         return value()
     elif value == "$self":
@@ -60,6 +61,16 @@ def get_value(value, v):
         return res_manager.get(value[1:])
     else:
         return value
+
+
+def approach(value, step, target):
+    target_value = get_value(target)
+    if abs(target_value - value) < step:
+        return target_value
+    elif target_value > value:
+        return value + step
+    else:
+        return value - step
 
 
 def get(data, return_type=None):
@@ -143,6 +154,10 @@ def get(data, return_type=None):
         elif method == METHOD_OTHERS_DATA_LIST:
             data_list = parameter["data_list"]
             method = lambda value: data_list[Clock.get() % len(data_list)]
+        elif method == METHOD_OTHERS_APPROACH:
+            step = parameter["step"]
+            target = parameter["target"]
+            method = lambda value: approach(value, step, target)
         else:
             print "not support method:", method
     return method

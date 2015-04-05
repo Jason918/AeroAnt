@@ -65,11 +65,9 @@ def timing(f):
     return wrap
 
 
-def get_data_from_xml(file_path):
-    with open(file_path, "r") as fin:
-        context = fin.read()
-        t = ET.XML(context)
-        return etree_to_dict(t)
+def get_data_from_xml_context(context):
+    t = ET.XML(context)
+    return etree_to_dict(t)
 
 
 def etree_to_dict(t):
