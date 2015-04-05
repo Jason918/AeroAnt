@@ -23,7 +23,7 @@
     <res name="temperature">
         <model>
             <format>number</format>
-            <initial>100</initial>
+            <initial>3</initial>
         </model>
         <update>
             <delay>10000</delay>
@@ -476,7 +476,7 @@
     <res name="brightness">
         <model>
             <format>number</format>
-            <initial>100</initial>
+            <initial>1</initial>
         </model>
         <update>
             <delay>10000</delay>
@@ -532,7 +532,7 @@
     <res name="power">
         <model>
             <format>number</format>
-            <initial>100</initial>
+            <initial>2</initial>
         </model>
         <update>
             <delay>10000</delay>
